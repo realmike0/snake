@@ -13,6 +13,8 @@
             background-color: #000;
             margin: 0;
             font-family: Arial, sans-serif;
+            color: white;
+            flex-direction: column;
         }
 
         canvas {
@@ -22,11 +24,42 @@
         h1 {
             color: white;
         }
+
+        /* Overlay che appare quando il gioco finisce */
+        #gameOverScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none; /* Di default nascosto */
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2em;
+        }
+
+        #gameOverMessage {
+            text-align: center;
+        }
+
+        #gameOverMessage p {
+            margin: 10px 0;
+        }
+
     </style>
 </head>
 <body>
     <h1>Snake Game</h1>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div id="gameOverScreen">
+        <div id="gameOverMessage">
+            <p>Game Over!</p>
+            <p>Punteggio: <span id="scoreDisplay"></span></p>
+            <p>Premi un tasto per ricominciare</p>
+        </div>
+    </div>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
@@ -38,6 +71,8 @@
 
         let snake;
         let fruit;
+        let gameOverScreen = document.getElementById("gameOverScreen");
+        let scoreDisplay = document.getElementById("scoreDisplay");
 
         (function setup() {
             snake = new Snake();
@@ -56,8 +91,7 @@
             }
 
             if (snake.checkCollision()) {
-                alert("Game Over!");
-                snake = new Snake();
+                showGameOverScreen();
             }
         }
 
@@ -120,12 +154,12 @@
             };
 
             this.checkCollision = function() {
-                // Check collision with walls
+                // Collisione con i muri
                 if (this.snakeArray[0].x < 0 || this.snakeArray[0].x >= columns || this.snakeArray[0].y < 0 || this.snakeArray[0].y >= rows) {
                     return true;
                 }
 
-                // Check collision with self
+                // Collisione con se stesso
                 for (let i = 1; i < this.snakeArray.length; i++) {
                     if (this.snakeArray[i].x === this.snakeArray[0].x && this.snakeArray[i].y === this.snakeArray[0].y) {
                         return true;
@@ -146,7 +180,26 @@
             };
         }
 
-        window.addEventListener("keydown", (e) => snake.changeDirection(e));
+        function showGameOverScreen() {
+            // Mostra la schermata di Game Over
+            scoreDisplay.textContent = snake.length - 1; // Mostra il punteggio
+            gameOverScreen.style.display = "flex"; // Visualizza l'overlay
+        }
+
+        function resetGame() {
+            snake = new Snake();
+            fruit = new Fruit();
+            gameOverScreen.style.display = "none"; // Nascondi la schermata di Game Over
+        }
+
+        window.addEventListener("keydown", (e) => {
+            // Se si preme un tasto dopo Game Over, il gioco si resetta
+            if (gameOverScreen.style.display === "flex") {
+                resetGame();
+            } else {
+                snake.changeDirection(e);
+            }
+        });
     </script>
 </body>
 </html>
